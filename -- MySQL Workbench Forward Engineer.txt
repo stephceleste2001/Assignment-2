@@ -1,0 +1,200 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema scf22g
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema scf22g
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `scf22g` DEFAULT CHARACTER SET utf8 ;
+USE `scf22g` ;
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`person`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`person` (
+  `per_id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `per_ssn` INT NOT NULL,
+  `per_fname` VARCHAR(15) NOT NULL,
+  `per_lname` VARCHAR(30) NOT NULL,
+  `per_gender` ENUM('m', 'f') NOT NULL,
+  `per_dob` DATE NOT NULL,
+  `per_street` VARCHAR(45) NOT NULL,
+  `per_city` VARCHAR(45) NOT NULL,
+  `per_state` CHAR(2) NOT NULL,
+  `per_zip` INT NOT NULL,
+  `per_phone` BIGINT NOT NULL,
+  `per_email` VARCHAR(100) NOT NULL,
+  `per_is_emp` ENUM('y', 'n') NOT NULL,
+  `per_is_alm` ENUM('y', 'n') NOT NULL,
+  `per_is_stu` ENUM('y', 'n') NOT NULL,
+  `per_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`employee`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`employee` (
+  `per_id` MEDIUMINT UNSIGNED NOT NULL,
+  `emp_title` VARCHAR(20) NOT NULL,
+  `emp_salary` DECIMAL(8,2) NOT NULL,
+  `emp_is_fac` ENUM('y', 'n') NOT NULL,
+  `emp_is_stf` ENUM('y', 'n') NOT NULL,
+  `emp_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_employee_person1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`person` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`faculty`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`faculty` (
+  `per_id` MEDIUMINT UNSIGNED NOT NULL,
+  `fac_rank` VARCHAR(20) NOT NULL,
+  `fac_start_date` DATE NOT NULL,
+  `fac_end_date` DATE NULL,
+  `fac_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_staff_employee1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`employee` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`staff`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`staff` (
+  `per_id` MEDIUMINT UNSIGNED NOT NULL,
+  `stf_position` VARCHAR(30) NOT NULL,
+  `stf_start_date` DATE NOT NULL,
+  `stf_end_date` DATE NULL,
+  `stf_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_staff_employee2`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`employee` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`alumnus`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`alumnus` (
+  `per_id` MEDIUMINT UNSIGNED NOT NULL,
+  `alm_notes` VARCHAR(225) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_alumnus_person1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`person` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`degree`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`degree` (
+  `deg_id` INT UNSIGNED NOT NULL,
+  `per_id` MEDIUMINT UNSIGNED NOT NULL,
+  `deg_type` VARCHAR(30) NOT NULL,
+  `deg_area` VARCHAR(30) NOT NULL,
+  `deg_date` DATE NOT NULL,
+  `deg_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`deg_id`),
+  INDEX `fk_degree_alumnus1_idx` (`per_id` ASC) VISIBLE,
+  CONSTRAINT `fk_degree_alumnus1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`alumnus` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`student`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`student` (
+  `per_id` MEDIUMINT NOT NULL,
+  `stu_major` VARCHAR(30) NOT NULL,
+  `stu_is_ugd` ENUM('y', 'n') NOT NULL,
+  `stud_grd` ENUM('y', 'n') NOT NULL,
+  `stu_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_student_person1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`person` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`undergrad`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`undergrad` (
+  `per_id` MEDIUMINT NOT NULL,
+  `ugd_test` ENUM('sat', 'act') NOT NULL,
+  `ugd_score` SMALLINT NOT NULL,
+  `ugd_standing` ENUM('freshman', 'sophmore', 'junior', 'senior') NOT NULL,
+  `ugd_start_date` DATE NOT NULL,
+  `ugd_end_date` DATE NULL,
+  `ugd_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_undergrad_student1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`student` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`grad`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`grad` (
+  `per_id` MEDIUMINT NOT NULL,
+  `grd_test` ENUM('sat', 'act') NOT NULL,
+  `grd_score` SMALLINT NOT NULL,
+  `grd_start_date` DATE NOT NULL,
+  `grd_end_date` DATE NULL,
+  `grd_notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`per_id`),
+  CONSTRAINT `fk_grad_student1`
+    FOREIGN KEY (`per_id`)
+    REFERENCES `scf22g`.`student` (`per_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `scf22g`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scf22g`.`user` (
+  `username` VARCHAR(16) NOT NULL,
+  `email` VARCHAR(255) NULL,
+  `password` VARCHAR(32) NOT NULL,
+  `create_time` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP);
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
